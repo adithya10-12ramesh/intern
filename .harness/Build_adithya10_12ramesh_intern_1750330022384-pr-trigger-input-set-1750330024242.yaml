@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_adithya10_12ramesh_intern_1750330022384-pr-trigger-input-set
+  identifier: Build_adithya10_12ramesh_intern_1750330022384prtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: intern
+  pipeline:
+    identifier: Build_adithya10_12ramesh_intern_1750330022384
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
