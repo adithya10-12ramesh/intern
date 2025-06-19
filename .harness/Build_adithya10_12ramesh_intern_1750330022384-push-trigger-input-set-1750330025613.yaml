@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_adithya10_12ramesh_intern_1750330022384-push-trigger-input-set
+  identifier: Build_adithya10_12ramesh_intern_1750330022384pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: intern
+  pipeline:
+    identifier: Build_adithya10_12ramesh_intern_1750330022384
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
