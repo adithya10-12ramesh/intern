@@ -28,19 +28,34 @@ pipeline:
                       . .venv/bin/activate
                       python3 -m pip install --upgrade pip
 
-                      # Remove cloud-init as it's not available on PyPI
+                      # Filter out system packages and install Python packages safely
                       if [ -f requirements.txt ]; then
                         echo "Original requirements.txt:"
                         cat requirements.txt
                         
-                        # Remove cloud-init from requirements
-                        grep -v "cloud-init" requirements.txt > requirements_no_cloud_init.txt
+                        # List of known system packages that shouldn't be installed via pip
+                        SYSTEM_PACKAGES="cloud-init|command-not-found|ubuntu-advantage-tools|update-manager-core|unattended-upgrades"
                         
-                        echo "Modified requirements (without cloud-init):"
-                        cat requirements_no_cloud_init.txt
+                        # Remove system packages
+                        grep -v -E "($SYSTEM_PACKAGES)" requirements.txt > requirements_python_only.txt
                         
-                        # Install dependencies without cloud-init
-                        python3 -m pip install -r requirements_no_cloud_init.txt
+                        echo "Filtered requirements (Python packages only):"
+                        cat requirements_python_only.txt
+                        
+                        # Install Python packages with error handling
+                        if [ -s requirements_python_only.txt ]; then
+                          python3 -m pip install -r requirements_python_only.txt || {
+                            echo "Batch install failed, trying individual packages..."
+                            while IFS= read -r line; do
+                              if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]] && [[ "$line" != *"$SYSTEM_PACKAGES"* ]]; then
+                                echo "Installing: $line"
+                                python3 -m pip install "$line" || echo "Failed to install: $line"
+                              fi
+                            done < requirements_python_only.txt
+                          }
+                        else
+                          echo "No Python packages to install"
+                        fi
                       else
                         echo "No requirements.txt found"
                       fi
