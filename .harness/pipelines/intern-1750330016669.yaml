@@ -28,31 +28,19 @@ pipeline:
                       . .venv/bin/activate
                       python3 -m pip install --upgrade pip
 
-                      # Handle problematic dependencies with multiple fallback strategies
+                      # Remove cloud-init as it's not available on PyPI
                       if [ -f requirements.txt ]; then
                         echo "Original requirements.txt:"
                         cat requirements.txt
                         
-                        # Strategy 1: Try with flexible cloud-init version
-                        sed 's/cloud-init==24.4/cloud-init/' requirements.txt > requirements_flexible.txt
-                        python3 -m pip install -r requirements_flexible.txt && success=1 || success=0
+                        # Remove cloud-init from requirements
+                        grep -v "cloud-init" requirements.txt > requirements_no_cloud_init.txt
                         
-                        # Strategy 2: If that fails, remove cloud-init entirely
-                        if [ $success -eq 0 ]; then
-                          echo "Flexible version failed, removing cloud-init..."
-                          grep -v "cloud-init" requirements.txt > requirements_no_cloud_init.txt
-                          python3 -m pip install -r requirements_no_cloud_init.txt && success=1 || success=0
-                        fi
+                        echo "Modified requirements (without cloud-init):"
+                        cat requirements_no_cloud_init.txt
                         
-                        # Strategy 3: Install packages one by one, skipping problematic ones
-                        if [ $success -eq 0 ]; then
-                          echo "Batch install failed, trying individual packages..."
-                          while IFS= read -r line; do
-                            if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]]; then
-                              python3 -m pip install "$line" || echo "Skipped: $line"
-                            fi
-                          done < requirements.txt
-                        fi
+                        # Install dependencies without cloud-init
+                        python3 -m pip install -r requirements_no_cloud_init.txt
                       else
                         echo "No requirements.txt found"
                       fi
