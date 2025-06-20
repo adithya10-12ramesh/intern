@@ -131,7 +131,16 @@ pipeline:
                         echo "No requirements.txt found"
                       fi
 
-                      python3 -m pip install -e .
+                      # Install any local dependencies if package structure exists
+                      if [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+                        echo "Found Python package configuration, installing in editable mode..."
+                        python3 -m pip install -e .
+                      elif [ -f "requirements-dev.txt" ]; then
+                        echo "Installing development dependencies..."
+                        python3 -m pip install -r requirements-dev.txt
+                      else
+                        echo "No package configuration found - dependencies already installed from requirements.txt"
+                      fi
                   timeout: ""
                   type: Run
               - step:
