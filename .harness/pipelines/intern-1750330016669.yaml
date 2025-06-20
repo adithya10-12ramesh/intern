@@ -20,6 +20,16 @@ pipeline:
           execution:
             steps:
               - step:
+                  identifier: install_system_deps
+                  name: install system dependencies
+                  spec:
+                    command: |-
+                      # Update package list and install build dependencies
+                      apt-get update
+                      apt-get install -y pkg-config libdbus-1-dev python3-dev build-essential
+                  timeout: ""
+                  type: Run
+              - step:
                   identifier: setupvirtualenvironment
                   name: setup virtual environment
                   spec:
